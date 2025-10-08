@@ -40,13 +40,13 @@
 
 // Import da biblioteca do PrismaClient 
 //const {PrismaClient} = require('@prisma/client')
-const {PrismaClient} = require('../../generated/prisma')
+const { PrismaClient } = require('../../generated/prisma')
 
 // Cria um objeto do prisma client para manipular os scripts SQL
 const prisma = new PrismaClient()
 
 // Retorna todos os filmes do banco de dados 
-const getSelectAllFilms = async function(){
+const getSelectAllFilms = async function () {
     try {
         // Script SQL
         let sql = `select * from tbl_filme order by id desc`
@@ -54,39 +54,57 @@ const getSelectAllFilms = async function(){
         // Executa no banco de dados o script SQL
         let result = await prisma.$queryRawUnsafe(sql)
 
-        if(result.length > 0)
+        // Validação para identificar se o retorno do BD é um ARRAY (vazio ou com dados)
+        if (Array.isArray(result))
             return result
         else
             return false
-        
+
     } catch (error) {
         //console.log(error)
-        return false        
+        return false
     }
-    
+
 }
 
 // Retorna um filme filtrando pelo ID do banco de dados 
-const getSelectByIdFilms = async function(id){
-    
+const getSelectByIdFilms = async function (id) {
+    try {
+        // Script SQL
+        let sql = `select * from tbl_filme where id = ${id}`
+
+        // Executa no banco de dados o script SQL
+        let result = await prisma.$queryRawUnsafe(sql)
+
+        // Validação para identificar se o retorno do BD é um ARRAY (vazio ou com dados)
+        if (Array.isArray(result))
+            return result
+        else
+            return false
+
+    } catch (error) {
+        //console.log(error)
+        return false
+    }
 }
 
 // Insere um filme no banco de dados 
-const setInsertFilms = async function(filme){
-    
+const setInsertFilms = async function (filme) {
+
 }
 
 // Atualiza um filme existente no banco de dados filtrando pelo ID 
-const setUpdateFilms = async function(filme){
-    
+const setUpdateFilms = async function (filme, id) {
+
 }
 
 // Apaga um filme existente no banco de dados filtrando pelo ID
-const setDeleteFilms = async function(id){
-    
+const setDeleteFilms = async function (id) {
+
 }
 
 
 module.exports = {
-    getSelectAllFilms
+    getSelectAllFilms,
+    getSelectByIdFilms
 }
