@@ -74,7 +74,7 @@ const getSelectLastIdGenre = async function () {
 const setInsertGenre = async function (genero) {
     try {
         let sql = `INSERT INTO tbl_genero (nome, descricao) VALUES ('${genero.nome}', '${genero.descricao}')`
-        
+
         // Executa o script SQL que cria um genero
         let result = await prisma.$executeRawUnsafe(sql)
 
@@ -83,19 +83,39 @@ const setInsertGenre = async function (genero) {
         else
             return false
     } catch (error) {
-        return false        
+        return false
     }
-    
+
 }
 
 // Atualiza um genero ja existente no Banco de dados
 const setUpdateGenre = async function (genero) {
     try {
         let sql = `UPDATE tbl_genero SET nome = '${genero.nome}', descricao = '${genero.descricao}' WHERE id = ${genero.id}`
-        
+
         // Executa o comando no banco de dados
         let result = await prisma.$executeRawUnsafe(sql)
 
+        if (result)
+            return true
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
+// Apaga um genero existente no BD
+const setDeleteGenre = async function (id) {
+    try {
+
+        // Script SQL para deletar no BD
+        let sql = `DELETE FROM tbl_genero WHERE id = ${id}`
+
+        // Executa o script SQL no BD
+        let result = await prisma.$executeRawUnsafe(sql)
+
+        // Valida se a requisição foi verdadeira
         if (result)
             return true
         else
@@ -110,5 +130,6 @@ module.exports = {
     getSelectByIdGenre,
     getSelectLastIdGenre,
     setInsertGenre,
-    setUpdateGenre
+    setUpdateGenre,
+    setDeleteGenre
 }

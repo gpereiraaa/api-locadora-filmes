@@ -24,3 +24,49 @@ INSERT INTO tbl_filme (nome, sinopse, data_lancamento, duracao, orcamento, trail
  '2012-04-27', '02:23:00', 220000000.00, 'https://www.adorocinema.com/filmes/filme-130440/trailer-19315928/', 'https://br.web.img3.acsta.net/c_310_420/medias/nmedia/18/89/43/82/20052140.jpg');
  
  SELECT * FROM tbl_filme;
+
+  
+CREATE TABLE tbl_genero (
+	id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(200) NOT NULL,
+    descricao TEXT NULL
+ );
+ 
+INSERT INTO tbl_genero (nome, descricao) VALUES ('Terror', 'Filme que causa muitos sustos nas pessoas e deixa com muito medo');
+ 
+SELECT * FROM tbl_genero;
+ 
+DESC tbl_genero;
+
+
+CREATE TABLE tbl_ator (
+	id_ator INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(200) NOT NULL,
+    nacionalidade VARCHAR(100) NOT NULL,
+    sexo VARCHAR(30) NOT NULL,
+    data_nascimento DATE NULL,
+    foto VARCHAR(200) NULL,
+    altura DECIMAL(5,2) NULL,
+    biografia TEXT NULL
+);
+
+INSERT INTO tbl_ator (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('Vin Diesel', 'Americano', 'Masculino', NULL, NULL, NULL, NULL);
+ 
+SELECT * FROM tbl_ator;
+
+DESC tbl_ator;
+
+create table tbl_produtora (
+	id_produtora INT primary KEY NOT NULL auto_increment,
+    nome varchar(200) NOT NULL,
+    pais varchar(200) null,
+    data_fundacao date null,
+    descricao text null,
+    site varchar(200) null
+);
+
+INSERT INTO tbl_produtora (nome, pais, data_fundacao, descricao, site) VALUES ('Produtora A', 'Estados Unidos', '1990-05-12', 'Produtora do velozes e furiosos', 'www.produtoraA.com');
+
+SELECT * FROM tbl_produtora ORDER BY id_produtora DESC;
+
+DESC tbl_produtora;

@@ -36,6 +36,12 @@ const controllerFilme = require('./controller/filme/controller_filme.js')
 // Import da controller de genero
 const controllerGenero = require('./controller/filme/controller_genero.js')
 
+// Import da controller de ator
+const controllerAtor = require('./controller/filme/controller_ator.js')
+
+// Import da controller de produtora
+const controllerProdutora = require('./controller/produtora/controller_produtora.js')
+
 // Endpoint para CRUD de filmes
 
 // Retorna a lista de filmes
@@ -80,7 +86,7 @@ app.post('/v1/locadora/filme', cors(), bodyParserJSON, async function (request, 
 app.put('/v1/locadora/filme/:id', cors(), bodyParserJSON, async function (request, response) {
     // Recebe os dados do body
     let dadosBody = request.body
-    
+
     // Recebe o id do filme encaminhado pela URL
     let idFilme = request.params.id
 
@@ -110,7 +116,7 @@ app.delete('/v1/locadora/filme/:id', cors(), async function (request, response) 
 
 // Retorna todos os generos
 app.get('/v1/locadora/generos', cors(), async function (request, response) {
-    
+
     // Chama a função da controller para retornar todos os generos
     let generos = await controllerGenero.listarGeneros()
 
@@ -146,6 +152,117 @@ app.post('/v1/locadora/genero', cors(), bodyParserJSON, async function (request,
     response.json(genero)
 })
 
+// Atualiza um genero existente no BD
+app.put('/v1/locadora/genero/:id', cors(), bodyParserJSON, async function (request, response) {
+
+    // Recebe os dados enviados no body
+    let dadosBody = request.body
+
+    // Recebe o ID do genero encaminhado pela URL
+    let idGenero = request.params.id
+
+    // Recebe o content-type da requisição
+    let contentType = request.headers['content-type']
+
+    // Chama a função da controller que atualiza o genero
+    let genero = await controllerGenero.atualizarGenero(dadosBody, idGenero, contentType)
+
+    response.status(genero.status_code)
+    response.json(genero)
+})
+
+// Deleta um genero existente no BD
+app.delete('/v1/locadora/genero/:id', cors(), async function (request, response) {
+    // Recebe o ID via params
+    let idGenero = request.params.id
+
+    // Chama a função deletar da controller
+    let genero = await controllerGenero.excluirGenero(idGenero)
+
+    response.status(genero.status_code)
+    response.json(genero)
+})
+
+
+// EndPoints para CRUD de atores
+
+// Retorna todos os atores
+app.get('/v1/locadora/atores', cors(), async function (request, response) {
+    // Chama a função da controller para listar todos os atores
+    let result = await controllerAtor.listarAtores()
+
+    response.status(result.status_code)
+    response.json(result)
+})
+
+app.get('/v1/locadora/ator/:id', cors(), async function (request, response) {
+    // Pega o ID enviado na requisição
+    let idAtor = request.params.id
+
+    // Chama a função da controller para retornar um ator
+    let ator = await controllerAtor.buscarAtorId(idAtor)
+
+    response.status(ator.status_code)
+    response.json(ator)
+})
+
+// Insere um novo ator no BD
+app.post('/v1/locadora/ator', cors(), bodyParserJSON, async function (request, response) {
+    // Recebe o objeto JSON pelo body da requisição
+    let dadosBody = request.body
+
+    // Recebe o content type da requisição
+    let contentType = request.headers['content-type']
+
+    // Chama a função da controller para inserir o genero, enviamos os dados do body e o content-type
+    let ator = await controllerAtor.inserirAtor(dadosBody, contentType)
+
+    response.status(ator.status_code)
+    response.json(ator)
+})
+
+// Atualiza um ator existente no BD
+app.put('/v1/locadora/ator/:id', cors(), bodyParserJSON, async function (request, response) {
+
+    // Recebe os dados enviados no body
+    let dadosBody = request.body
+
+    // Recebe o ID do genero encaminhado pela URL
+    let idAtor = request.params.id
+
+    // Recebe o content-type da requisição
+    let contentType = request.headers['content-type']
+
+    // Chama a função da controller que atualiza o ator
+    let ator = await controllerAtor.atualizarAtor(dadosBody, idAtor, contentType)
+
+    response.status(ator.status_code)
+    response.json(ator)
+})
+
+// Deleta um ator existente no BD
+app.delete('/v1/locadora/ator/:id', cors(), async function (request, response) {
+    // Recebe o ID via params
+    let idAtor = request.params.id
+
+    // Chama a função deletar da controller
+    let ator = await controllerAtor.deletarAtor(idAtor)
+
+    response.status(ator.status_code)
+    response.json(ator)
+})
+
+// EndPoints para CRUD de produtoras
+
+// Retorna todos os generos
+app.get('/v1/locadora/produtoras', cors(), async function (request, response) {
+
+    // Chama a função da controller para retornar todas as produtoras
+    let produtoras = await controllerProdutora.listarProdutoras()
+
+    response.status(produtoras.status_code)
+    response.json(produtoras)
+})
 
 app.listen(PORT, function () {
     console.log('API aguardando requisições!!!')
