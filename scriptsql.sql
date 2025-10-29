@@ -70,3 +70,18 @@ INSERT INTO tbl_produtora (nome, pais, data_fundacao, descricao, site) VALUES ('
 SELECT * FROM tbl_produtora ORDER BY id_produtora DESC;
 
 DESC tbl_produtora;
+
+CREATE TABLE tbl_personagem (
+	id_personagem INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(200) NOT NULL,
+    nacionalidade VARCHAR(100) NULL,
+    apelido VARCHAR(100) NULL,
+    descricao TEXT NULL,
+    biografia TEXT NULL,
+    sexo VARCHAR(30) NULL,
+    foto VARCHAR(200) NULL
+);
+
+INSERT INTO tbl_personagem (nome, nacionalidade, apelido, descricao, biografia, sexo, foto) VALUES ('Batman', 'Americano', 'Morcego', NULL, NULL, 'Masculino', NULL);
+
+SELECT * FROM tbl_personagem ORDER BY id_personagem DESC;

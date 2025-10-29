@@ -40,7 +40,10 @@ const controllerGenero = require('./controller/filme/controller_genero.js')
 const controllerAtor = require('./controller/filme/controller_ator.js')
 
 // Import da controller de produtora
-const controllerProdutora = require('./controller/produtora/controller_produtora.js')
+const controllerProdutora = require('./controller/filme/produtora/controller_produtora.js')
+
+// Import da controller de personagens
+const controllerPersonagem = require('./controller/filme/personagem/controller_personagem.js')
 
 // Endpoint para CRUD de filmes
 
@@ -195,6 +198,7 @@ app.get('/v1/locadora/atores', cors(), async function (request, response) {
     response.json(result)
 })
 
+// Retorna um ator pelo ID
 app.get('/v1/locadora/ator/:id', cors(), async function (request, response) {
     // Pega o ID enviado na requisição
     let idAtor = request.params.id
@@ -262,6 +266,89 @@ app.get('/v1/locadora/produtoras', cors(), async function (request, response) {
 
     response.status(produtoras.status_code)
     response.json(produtoras)
+})
+
+// Retorna uma produtora pelo ID
+app.get('/v1/locadora/produtora/:id', cors(), async function (request, response) {
+    // Pega o ID enviado via Params
+    let idProdutora = request.params.id
+
+    // Chama a função da controller para retorna o filme pelo ID
+    let produtora = await controllerProdutora.buscarProdutoraId(idProdutora)
+
+    response.status(produtora.status_code)
+    response.json(produtora)
+})
+
+// Insere uma nova produtora no BD
+app.post('/v1/locadora/produtora', cors(), bodyParserJSON, async function (request, response) {
+    // Recebe o objeto JSON pelo body da requisição
+    let dadosBody = request.body
+
+    // Recebe o content type da requisição
+    let contentType = request.headers['content-type']
+
+    // Chama a função da controller para inserir a nova produtora
+    let produtora = await controllerProdutora.inserirProdutora(dadosBody, contentType)
+
+    response.status(produtora.status_code)
+    response.json(produtora)
+})
+
+// Atualiza uma produtora existente
+app.put('/v1/locadora/produtora/:id', cors(), bodyParserJSON, async function (request, response) {
+
+    // Recebe os dados enviados no Body
+    let dadosBody = request.body
+
+    // Recebe o ID da produtora encaminhado pela URL
+    let idProdutora = request.params.id
+
+    // Recebe o content-type da requisição
+    let contentType = request.headers['content-type']
+
+    // Chama a função da controller que atualiza a produtora
+    let produtora = await controllerProdutora.atualizarProdutora(dadosBody, idProdutora, contentType)
+
+    response.status(produtora.status_code)
+    response.json(produtora)
+})
+
+// Deleta uma produtora existente
+app.delete('/v1/locadora/produtora/:id', cors(), async function (request, response) {
+    // Recebe o ID enviado via params
+    let idProdutora = request.params.id
+
+    // Chama a função da controller que deleta uma produtora
+    let produtora = await controllerProdutora.deletarProdutora(idProdutora)
+
+    response.status(produtora.status_code)
+    response.json(produtora)
+})
+
+
+// EndPoints para CRUD de personagens
+
+// Retorna todos os personagens
+app.get('/v1/locadora/personagens', cors(), async function (request, response) {
+
+    // Chama a função da controller que retorna todos os personagens
+    let personagem = await controllerPersonagem.listarPersonagens()
+
+    response.status(personagem.status_code)
+    response.json(personagem)    
+})
+
+// Retorna um personagem pelo ID
+app.get('/v1/locadora/personagem/:id', cors(), async function (request, response) {
+    // Pega o id enviado via params
+    let idPersonagem = request.params.id
+
+    // Chama a função da controller que retorna o personagem pelo id
+    let personagem = await controllerPersonagem.buscarPersonagemId(idPersonagem)
+
+    response.status(personagem.status_code)
+    response.json(personagem)
 })
 
 app.listen(PORT, function () {
