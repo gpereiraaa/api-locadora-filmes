@@ -50,9 +50,66 @@ const getSelectByIdCharacter = async function (id) {
     }
 }
 
+// Insere um personagem no BD
+const setInsertCharacter = async function (personagem) {
+    try {
+        let sql = `INSERT INTO tbl_personagem (nome, nacionalidade, apelido, descricao, biografia, sexo, foto) VALUES ('${personagem.nome}', '${personagem.nacionalidade}', '${personagem.apelido}', '${personagem.descricao}', '${personagem.biografia}', '${personagem.sexo}', '${personagem.foto}')`
+        
+        // Executa o script SQL que cria um genero
+        let result = await prisma.$executeRawUnsafe(sql)
+
+        if (result)
+            return true
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
+// Atualiza um personagem ja existente no Banco de dados
+const setUpdateCharacter = async function (personagem) {
+    try {
+        let sql = `UPDATE tbl_personagem SET nome = '${personagem.nome}', nacionalidade = '${personagem.nacionalidade}', apelido = '${personagem.apelido}', descricao = '${personagem.descricao}', biografia = '${personagem.biografia}', sexo = '${personagem.sexo}', foto = '${personagem.foto}' WHERE id = ${personagem.id}`
+
+        // Executa o comando no banco de dados
+        let result = await prisma.$executeRawUnsafe(sql)
+
+        if (result)
+            return true
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
+// Apaga um personagem existente no BD
+const setDeleteCharacter = async function (id) {
+    try {
+
+        // Script SQL para deletar no BD
+        let sql = `DELETE FROM tbl_personagem WHERE id = ${id}`
+
+        // Executa o script SQL no BD
+        let result = await prisma.$executeRawUnsafe(sql)
+
+        // Valida se a requisição foi verdadeira
+        if (result)
+            return true
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
 
 
 module.exports = {
     getSelectAllCharacters,
-    getSelectByIdCharacter
+    getSelectByIdCharacter,
+    setInsertCharacter,
+    setUpdateCharacter,
+    setDeleteCharacter
 }

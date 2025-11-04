@@ -6,6 +6,15 @@
  ************************************************************************************************************************************************/
 
 const dataAtual = new Date()
+// {
+//     "nome": "Paul Walker", 
+//     "nacionalidade": "Americano", 
+//     "sexo": "Masculino", 
+//     "data_nascimento": "1975-04-12", 
+//     "foto": "null", 
+//     "altura": 1.75,
+//     "biografia": "null"
+// }
 
 /**************************** MENSAGENS DE PADRONIZAÇÃO DO PROJETO ******************************************** */
 

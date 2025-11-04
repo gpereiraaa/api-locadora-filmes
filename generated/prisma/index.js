@@ -122,7 +122,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "C:\\Users\\25132694\\Desktop\\aulaback\\AULA-05\\generated\\prisma",
+      "value": "C:\\Users\\guga2\\Downloads\\programação\\api-locadora-filmes\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -136,7 +136,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "C:\\Users\\25132694\\Desktop\\aulaback\\AULA-05\\prisma\\schema.prisma",
+    "sourceFilePath": "C:\\Users\\guga2\\Downloads\\programação\\api-locadora-filmes\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -150,6 +150,7 @@ const config = {
     "db"
   ],
   "activeProvider": "mysql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
