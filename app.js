@@ -57,6 +57,12 @@ const routesPersonagem = require('./routes/personagemRoutes.js')
 // Criando a rota padrão do CRUD de produtora, chmando o cors e chmando o arquivo de Routes
 app.use('/v1/locadora/personagem', cors(), routesPersonagem)
 
+// Import da router de diretor
+const routesDiretor = require('./routes/diretorRoutes.js')
+
+// Criando a rota padrão do CRUD de diretor, chmando o cors e chmando o arquivo de Routes
+app.use('/v1/locadora/diretor', cors(), routesDiretor)
+
 
 app.listen(PORT, function () {
     console.log('API aguardando requisições!!!')

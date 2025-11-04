@@ -1,6 +1,6 @@
 /*******************************************************************************************************************************************
- * Objetivo: Arquivo responsavel pelo CRUD de ator no banco de dados MYSQL
- * Data: 22/10/2025
+ * Objetivo: Arquivo responsavel pelo CRUD de diretor no banco de dados MYSQL
+ * Data: 04/11/2025
  * Autor: Gustavo Pereira 
  * Versão: 1.0 
  ******************************************************************************************************************************************/
@@ -14,11 +14,11 @@ const prisma = new PrismaClient()
 // Import do arquivo padrão de mensagens
 const MESSAGE_DEFAULT = require('../../controller/modulo/config_messages.js')
 
-// Retorna todos os atores cadastrados no BD
-const getSelectAllActors = async function () {
+// Retorna todos os diretores cadastrados no BD
+const getSelectAllDirectors = async function () {
     try {
-        // Cria o script SQL que retorna todos os atores
-        let sql = `SELECT * FROM tbl_ator ORDER BY id_ator DESC`
+        // Cria o script SQL que retorna todos os diretores
+        let sql = `SELECT * FROM tbl_diretor ORDER BY id_diretor DESC`
 
         // Executa o script no BD
         let result = await prisma.$queryRawUnsafe(sql)
@@ -33,12 +33,12 @@ const getSelectAllActors = async function () {
     }
 }
 
-// Retorna um ator filtrando pelo ID
-const getSelectByIdActor = async function (id) {
+// Retorna um diretor filtrando pelo ID
+const getSelectByIdDirector = async function (id) {
 
     try {
         // Script SQL
-        let sql = `SELECT * FROM tbl_ator WHERE id_ator = ${id}`
+        let sql = `SELECT * FROM tbl_diretor WHERE id_diretor = ${id}`
 
         // Executa o script no BD
         let result = await prisma.$queryRawUnsafe(sql)
@@ -54,18 +54,18 @@ const getSelectByIdActor = async function (id) {
 
 }
 
-// Retorna o ID do ultimo ator
-const getSelectLastIdActor = async function () {
+// Retorna o ID do ultimo diretor
+const getSelectLastIdDirector = async function () {
     try {
         // Script SQL
-        let sql = `select id_ator from tbl_ator order by id_ator desc limit 1`
+        let sql = `select id_diretor from tbl_diretor order by id_diretor desc limit 1`
 
         // Executa no banco de dados o script SQL
         let result = await prisma.$queryRawUnsafe(sql)
 
         // Validação para identificar se o retorno do BD é um ARRAY (vazio ou com dados)
         if (Array.isArray(result))
-            return Number(result[0].id_ator)
+            return Number(result[0].id_diretor)
         else
             return false
 
@@ -74,16 +74,16 @@ const getSelectLastIdActor = async function () {
     }
 }
 
-// Insere um novo ator no Banco de dados
-const setInsertActor = async function (ator) {
+// Insere um novo diretor no Banco de dados
+const setInsertDirector = async function (diretor) {
     // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
     let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
     try {
-        if (ator.data_nascimento == '' || ator.data_nascimento == null || ator.nome == undefined) {
+        if (diretor.data_nascimento == '' || diretor.data_nascimento == null || diretor.nome == undefined) {
             // Script SLQ para inserir no banco
-            let sql = `INSERT INTO tbl_ator (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('${ator.nome}', '${ator.nacionalidade}', '${ator.sexo}', NULL, '${ator.foto}', '${ator.altura}', '${ator.biografia}')`
+            let sql = `INSERT INTO tbl_diretor (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('${diretor.nome}', '${diretor.nacionalidade}', '${diretor.sexo}', NULL, '${diretor.foto}', '${diretor.altura}', '${diretor.biografia}')`
 
-            // Executa o script SQL que cria um ator no Banco de Dados
+            // Executa o script SQL que cria um diretor no Banco de Dados
             let result = await prisma.$executeRawUnsafe(sql)
 
             // Valida se a requisição foi verdadeira
@@ -91,14 +91,14 @@ const setInsertActor = async function (ator) {
                 return true
             else
                 return false
-        } else if (ator.data_nascimento.length != 10) {
+        } else if (diretor.data_nascimento.length != 10) {
             MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [DATA_NASCIMENTO] inválido!!!'
             return MESSAGE.ERROR_REQUIRED_FIELDS // 400 
         } else {
             // Script SQL para inserir no banco
-            let sql = `INSERT INTO tbl_ator (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('${ator.nome}', '${ator.nacionalidade}', '${ator.sexo}', '${ator.data_nascimento}', '${ator.foto}', '${ator.altura}', '${ator.biografia}')`
+            let sql = `INSERT INTO tbl_diretor (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('${diretor.nome}', '${diretor.nacionalidade}', '${diretor.sexo}', '${diretor.data_nascimento}', '${diretor.foto}', '${diretor.altura}', '${diretor.biografia}')`
 
-            // Executa o script SQL que cria um ator no Banco de Dados
+            // Executa o script SQL que cria um diretor no Banco de Dados
             let result = await prisma.$executeRawUnsafe(sql)
 
             // Valida se a requisição foi verdadeira
@@ -112,12 +112,12 @@ const setInsertActor = async function (ator) {
     }
 }
 
-// Edita um ator já existente no BD
-const setUpdateActor = async function (ator) {
+// Edita um diretor já existente no BD
+const setUpdateDirector = async function (diretor) {
     try {
-        if (ator.data_nascimento == '' || ator.data_nascimento == null || ator.nome == undefined) {
-            // Script SQL que atualiza o ATOR existente
-            let sql = `UPDATE tbl_ator SET nome = '${ator.nome}', nacionalidade = '${ator.nacionalidade}', sexo = '${ator.sexo}', data_nascimento = NULL, foto = '${ator.foto}', altura = '${ator.altura}', biografia = '${ator.biografia}' WHERE id_ator = ${ator.id}`
+        if (diretor.data_nascimento == '' || diretor.data_nascimento == null || diretor.nome == undefined) {
+            // Script SQL que atualiza o diretor existente
+            let sql = `UPDATE tbl_diretor SET nome = '${diretor.nome}', nacionalidade = '${diretor.nacionalidade}', sexo = '${diretor.sexo}', data_nascimento = NULL, foto = '${diretor.foto}', altura = '${diretor.altura}', biografia = '${diretor.biografia}' WHERE id_diretor = ${diretor.id}`
 
             // Executa o comando no BD
             let result = await prisma.$executeRawUnsafe(sql)
@@ -126,12 +126,12 @@ const setUpdateActor = async function (ator) {
                 return true
             else
                 return false
-        } else if (ator.data_nascimento.length != 10) {
+        } else if (diretor.data_nascimento.length != 10) {
             MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [DATA_NASCIMENTO] inválido!!!'
-            return MESSAGE.ERROR_REQUIRED_FIELDS // 400 
+            return MESSAGE.ERROR_REQUIRED_FIELDS // 400
         } else {
-            // Script SQL que atualiza o ATOR existente
-            let sql = `UPDATE tbl_ator SET nome = '${ator.nome}', nacionalidade = '${ator.nacionalidade}', sexo = '${ator.sexo}', data_nascimento = '${ator.data_nascimento}', foto = '${ator.foto}', altura = '${ator.altura}', biografia = '${ator.biografia}' WHERE id_ator = ${ator.id}`
+            // Script SQL que atualiza o diretor existente
+            let sql = `UPDATE tbl_diretor SET nome = '${diretor.nome}', nacionalidade = '${diretor.nacionalidade}', sexo = '${diretor.sexo}', data_nascimento = '${diretor.data_nascimento}', foto = '${diretor.foto}', altura = '${diretor.altura}', biografia = '${diretor.biografia}' WHERE id_diretor = ${diretor.id}`
 
             // Executa o comando no BD
             let result = await prisma.$executeRawUnsafe(sql)
@@ -146,11 +146,11 @@ const setUpdateActor = async function (ator) {
     }
 }
 
-// Deleta um ator já existente
-const setDeleteActor = async function (id) {
+// Deleta um diretor já existente
+const setDeleteDirector = async function (id) {
     try {
-        // Script sql que deleta um Ator no BD
-        let sql = `DELETE FROM tbl_ator WHERE id_ator = ${id}`
+        // Script sql que deleta um diretor no BD
+        let sql = `DELETE FROM tbl_diretor WHERE id_diretor = ${id}`
 
         // Executa o script no BD
         let result = await prisma.$executeRawUnsafe(sql)
@@ -169,10 +169,10 @@ const setDeleteActor = async function (id) {
 
 
 module.exports = {
-    getSelectAllActors,
-    getSelectByIdActor,
-    getSelectLastIdActor,
-    setInsertActor,
-    setUpdateActor,
-    setDeleteActor
+    getSelectAllDirectors,
+    getSelectByIdDirector,
+    getSelectLastIdDirector,
+    setInsertDirector,
+    setUpdateDirector,
+    setDeleteDirector
 }

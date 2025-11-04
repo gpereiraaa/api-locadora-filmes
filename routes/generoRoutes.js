@@ -12,7 +12,7 @@ const express = require('express')
 const router = express.Router()
 
 // Importando o controller de genero
-const controllerGenero = require('../controller/filme/controller_genero.js')
+const controllerGenero = require('../controller/filme/genero/controller_genero.js')
 
 // Importando o body-parser
 const bodyParser = require('body-parser')

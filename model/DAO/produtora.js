@@ -11,6 +11,9 @@ const { PrismaClient } = require('../../generated/prisma')
 // Cria um objeto do prisma client para manipular os scripts SQL
 const prisma = new PrismaClient()
 
+// Import do arquivo padrão das mensagens 
+const MESSAGE_DEFAULT = require('../../controller/modulo/config_messages.js')
+
 // Retorna todas as produtoras cadastradas no BD
 const getSelectAllProducers = async function () {
     try {
@@ -71,37 +74,76 @@ const getSelectLastIdProducer = async function () {
 
 // Insere uma nova produtora no Banco de dados
 const setInsertProducer = async function (produtora) {
+    // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
+    let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
     try {
-        // Script SQL 
-        let sql = `INSERT INTO tbl_produtora (nome, pais, data_fundacao, descricao, site) VALUES ('${produtora.nome}', '${produtora.pais}', '${produtora.data_fundacao}', '${produtora.descricao}', '${produtora.site}')`
+        if (produtora.data_fundacao == '' || produtora.data_fundacao == null || produtora.data_fundacao == undefined) {
+            // Script SQL 
+            let sql = `INSERT INTO tbl_produtora (nome, pais, data_fundacao, descricao, site) VALUES ('${produtora.nome}', '${produtora.pais}', NULL, '${produtora.descricao}', '${produtora.site}')`
 
-        // Executa o comando no BD
-        let result = await prisma.$executeRawUnsafe(sql)
+            // Executa o comando no BD
+            let result = await prisma.$executeRawUnsafe(sql)
 
-        // Valida se a requisição é verdadeira
-        if (result)
-            return true
-        else
-            return false
+            // Valida se a requisição é verdadeira
+            if (result)
+                return true
+            else
+                return false
+        } else if (produtora.data_fundacao.length != 10) {
+            MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [DATA_FUNDACAO] inválido!!!'
+            return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+        } else {
+            // Script SQL 
+            let sql = `INSERT INTO tbl_produtora (nome, pais, data_fundacao, descricao, site) VALUES ('${produtora.nome}', '${produtora.pais}', '${produtora.data_fundacao}', '${produtora.descricao}', '${produtora.site}')`
+
+            // Executa o comando no BD
+            let result = await prisma.$executeRawUnsafe(sql)
+
+            // Valida se a requisição é verdadeira
+            if (result)
+                return true
+            else
+                return false
+        }
     } catch (error) {
         return false
     }
 }
 
+
 // Atualiza uma produtora já existente no BD
 const setUpdateProducer = async function (produtora) {
+    // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
+    let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
     try {
-        // Script SQL
-        let sql = `UPDATE tbl_produtora SET nome = '${produtora.nome}', pais = '${produtora.pais}', data_fundacao = '${produtora.data_fundacao}', descricao = '${produtora.descricao}', site = '${produtora.site}' WHERE id_produtora = ${produtora.id}`
+        if (produtora.data_fundacao == '' || produtora.data_fundacao == null || produtora.data_fundacao == undefined) {
+            // Script SQL
+            let sql = `UPDATE tbl_produtora SET nome = '${produtora.nome}', pais = '${produtora.pais}', data_fundacao = NULL, descricao = '${produtora.descricao}', site = '${produtora.site}' WHERE id_produtora = ${produtora.id}`
 
-        // Executa o comando no BD
-        let result = await prisma.$executeRawUnsafe(sql)
+            // Executa o comando no BD
+            let result = await prisma.$executeRawUnsafe(sql)
 
-        // Valida se foi verdadeira
-        if (result)
-            return true
-        else
-            return false
+            // Valida se foi verdadeira
+            if (result)
+                return true
+            else
+                return false
+        } else if (produtora.data_fundacao.length != 10) {
+            MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [DATA_FUNDACAO] inválido!!!'
+            return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+        } else {
+            // Script SQL
+            let sql = `UPDATE tbl_produtora SET nome = '${produtora.nome}', pais = '${produtora.pais}', data_fundacao = '${produtora.data_fundacao}', descricao = '${produtora.descricao}', site = '${produtora.site}' WHERE id_produtora = ${produtora.id}`
+
+            // Executa o comando no BD
+            let result = await prisma.$executeRawUnsafe(sql)
+
+            // Valida se foi verdadeira
+            if (result)
+                return true
+            else
+                return false
+        }
     } catch (error) {
         return false
     }

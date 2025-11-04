@@ -71,7 +71,168 @@ const buscarPersonagemId = async function (id) {
     }
 }
 
+// Insere um novo personagem
+const inserirPersonagem = async function (personagem, contentType) {
+
+    // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
+    let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
+
+    try {
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
+
+            // Chama a função de validação de dados
+            let validarDados = validarDadosPersonagem(personagem)
+
+            // Verifica se retornou false, se sim continua
+            if (!validarDados) {
+
+                // Chama a função do DAO para inserir um novo personagem
+                let result = await personagemDAO.setInsertCharacter(personagem)
+
+                // Valida se result é verdadeiro
+                if (result) {
+                    // Chama a função que retorna o ID gerado no BD
+                    let lastId = await personagemDAO.getSelectLastIdCharacter()
+
+                    // Verifica se é verdadeiro
+                    if (lastId) {
+                        // Adiciona no JSON o ID
+                        personagem.id = lastId
+
+                        MESSAGE.HEADER.status = MESSAGE.SUCCESS_CREATED_ITEM.status
+                        MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_CREATED_ITEM.status_code
+                        MESSAGE.HEADER.message = MESSAGE.SUCCESS_CREATED_ITEM.message
+                        MESSAGE.HEADER.response = personagem
+
+                        return MESSAGE.HEADER // 201
+                    } else
+                        return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
+                } else
+                    return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
+            } else
+                return validarDados // 400
+        } else
+            return MESSAGE.ERROR_CONTENT_TYPE // 415
+    } catch (error) {
+        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+    }
+}
+
+
+// Validação dos dados de cadastro ou atualização de um novo personagem
+const validarDadosPersonagem = function (personagem) {
+
+    // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
+    let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
+
+    // Validação de todos os campos
+    if (personagem.nome == '' || personagem.nome == null || personagem.nome == undefined || personagem.nome.length > 200) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [NOME] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else if (personagem.nacionalidade == undefined || personagem.nacionalidade.length > 100) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [NACIONALIDADE] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else if (personagem.apelido == undefined || personagem.apelido.length > 100) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [APELIDO] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else if (personagem.biografia === undefined) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [BIOGRAFIA] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else if (personagem.descricao === undefined) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [DESCRIÇÃO] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else if (personagem.sexo == undefined || personagem.sexo.length > 30) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [SEXO] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else if (personagem.foto == undefined || personagem.foto.length > 200) {
+        MESSAGE.ERROR_REQUIRED_FIELDS.invalid_field = 'Atributo [FOTO] inválido!!!'
+        return MESSAGE.ERROR_REQUIRED_FIELDS // 400
+    } else
+        return false
+}
+
+// Atualiza um personagem já existente
+const atualizarPersonagem = async function (personagem, id, contentType) {
+
+    // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
+    let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
+
+    try {
+        if (String(contentType).toUpperCase() == 'APPLICATION/JSON') {
+
+            // Chama a função de validação de dados
+            let validarDados = validarDadosPersonagem(personagem)
+
+            // Verifica se retornou false, se sim continua
+            if (!validarDados) {
+
+                // Chama a função para validar se o ID existe
+                let validarID = await buscarPersonagemId(id)
+
+                // Verifica se o ID existe, caso sim ele retorna 200
+                if (validarID.status_code == 200) {
+
+                    // Adicionando o ID no JSON de personagem
+                    personagem.id = id
+
+                    // Chama a função do DAO para atualizar o personagem
+                    let result = await personagemDAO.setUpdateCharacter(personagem)
+
+                    // Valida se result é verdadeiro e cria a mensagem
+                    if (result) {
+                        MESSAGE.HEADER.status = MESSAGE.SUCCESS_UPDATE_ITEM.status
+                        MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_UPDATE_ITEM.status_code
+                        MESSAGE.HEADER.message = MESSAGE.SUCCESS_UPDATE_ITEM.message
+                        MESSAGE.HEADER.response = personagem
+
+                        return MESSAGE.HEADER // 201
+                    } else
+                        return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
+                } else
+                    return validarID // Retorno da função de validarID (400 ou 404 ou 500)
+            } else
+                return validarDados // 400
+        } else
+            return MESSAGE.ERROR_CONTENT_TYPE // 415
+    } catch (error) {
+        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+    }
+}
+
+// Deleta um personagem já existente
+const deletarPersonagem = async function (id) {
+
+    // Realizando copia do objeto de mensagem padrão, permitindo que as alterações feitas nesta função não interfiram em outra função
+    let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
+
+    try {
+        // Chama a função para validar se o ID existe no BD
+        let validarID = await buscarPersonagemId(parseInt(id))
+
+        // Caso o ID seja verdadeiro, teremos o status 200 e assim seguiremos
+        if (validarID.status_code == 200) {
+            // Chama a função do DAO que deleta o personagem
+            let result = await personagemDAO.setDeleteCharacter(parseInt(id))
+
+            // Caso seja verdadeira ele cria a mensagem
+            if (result) {
+                MESSAGE.HEADER.status = MESSAGE.SUCCESS_DELETE_ITEM.status
+                MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_DELETE_ITEM.status_code
+                MESSAGE.HEADER.message = MESSAGE.SUCCESS_DELETE_ITEM.message
+
+                return MESSAGE.HEADER // 200
+            } else
+                return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
+        } else
+            return validarID // Retorno da função de validarID (400 ou 404 ou 500)
+    } catch (error) {
+        return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER // 500
+    }
+}
 module.exports = {
     listarPersonagens,
-    buscarPersonagemId
+    buscarPersonagemId,
+    inserirPersonagem,
+    atualizarPersonagem,
+    deletarPersonagem
 }

@@ -50,6 +50,27 @@ const getSelectByIdCharacter = async function (id) {
     }
 }
 
+// Retorna o ID do ultimo personagem inserido
+const getSelectLastIdCharacter = async function () {
+    try {
+        // Script SQL
+        let sql = `SELECT id_personagem FROM tbl_personagem ORDER BY id_personagem DESC LIMIT 1`
+
+        // Executa o comando no Banco de Dados
+        let result = await prisma.$queryRawUnsafe(sql)
+
+        // Validação para identificar se o retorno do Banco é um ARRAY
+        if (Array.isArray(result))
+            // Transforma o retorno do BD em um Numero e retorna apenas o numero
+            return Number(result[0].id_personagem)
+        else
+            return false
+    } catch (error) {
+        return false
+    }
+}
+
+
 // Insere um personagem no BD
 const setInsertCharacter = async function (personagem) {
     try {
@@ -70,7 +91,7 @@ const setInsertCharacter = async function (personagem) {
 // Atualiza um personagem ja existente no Banco de dados
 const setUpdateCharacter = async function (personagem) {
     try {
-        let sql = `UPDATE tbl_personagem SET nome = '${personagem.nome}', nacionalidade = '${personagem.nacionalidade}', apelido = '${personagem.apelido}', descricao = '${personagem.descricao}', biografia = '${personagem.biografia}', sexo = '${personagem.sexo}', foto = '${personagem.foto}' WHERE id = ${personagem.id}`
+        let sql = `UPDATE tbl_personagem SET nome = '${personagem.nome}', nacionalidade = '${personagem.nacionalidade}', apelido = '${personagem.apelido}', descricao = '${personagem.descricao}', biografia = '${personagem.biografia}', sexo = '${personagem.sexo}', foto = '${personagem.foto}' WHERE id_personagem = ${personagem.id}`
 
         // Executa o comando no banco de dados
         let result = await prisma.$executeRawUnsafe(sql)
@@ -89,7 +110,7 @@ const setDeleteCharacter = async function (id) {
     try {
 
         // Script SQL para deletar no BD
-        let sql = `DELETE FROM tbl_personagem WHERE id = ${id}`
+        let sql = `DELETE FROM tbl_personagem WHERE id_personagem = ${id}`
 
         // Executa o script SQL no BD
         let result = await prisma.$executeRawUnsafe(sql)
@@ -109,6 +130,7 @@ const setDeleteCharacter = async function (id) {
 module.exports = {
     getSelectAllCharacters,
     getSelectByIdCharacter,
+    getSelectLastIdCharacter,
     setInsertCharacter,
     setUpdateCharacter,
     setDeleteCharacter
