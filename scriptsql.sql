@@ -85,3 +85,42 @@ CREATE TABLE tbl_personagem (
 INSERT INTO tbl_personagem (nome, nacionalidade, apelido, descricao, biografia, sexo, foto) VALUES ('Batman', 'Americano', 'Morcego', NULL, NULL, 'Masculino', NULL);
 
 SELECT * FROM tbl_personagem ORDER BY id_personagem DESC;
+
+
+
+CREATE TABLE tbl_diretor (
+	id_diretor INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    nome VARCHAR(200) NOT NULL,
+    nacionalidade VARCHAR(100) NOT NULL,
+    sexo VARCHAR(30) NOT NULL,
+    data_nascimento DATE NULL,
+    foto VARCHAR(200) NULL,
+    altura DECIMAL(5,2) NULL,
+    biografia TEXT NULL
+);
+
+INSERT INTO tbl_diretor (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('Vin Diesel', 'Americano', 'Masculino', NULL, NULL, NULL, NULL);
+
+INSERT INTO tbl_diretor (nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia) VALUES ('Paul Walker', 'Americano', 'Masculino', '1975-04-12', 'aaaaaaaaaaaaaaaaa', '1.75', 'aaaaaaaaaaaaaaaaaaaa');
+ 
+SELECT * FROM tbl_diretor;
+
+SELECT * FROM tbl_diretor ORDER BY id_diretor DESC;
+
+DESC tbl_diretor;
+
+Create table tbl_filme_genero(
+	id int not null primary key auto_increment,
+    id_filme int not null,
+    id_genero int not null,
+    
+    constraint FK_FILME_FILME_GENERO # Nome da relação
+    foreign key(id_filme) # Qual a chave estrangeira
+    references tbl_filme(id), # De onde vem a FK
+    
+    constraint FK_GENERO_FILME_GENERO
+    foreign key(id_genero)
+    references tbl_genero(id)
+);
+
+select * from tbl_filme_genero;

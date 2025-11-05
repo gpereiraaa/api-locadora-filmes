@@ -6,10 +6,10 @@
  ********************************************************************************************************/
 
 // Import do arquivo do DAO para manipular o CRUD
-const atorDAO = require('../../model/DAO/ator.js')
+const atorDAO = require('../../../model/DAO/ator.js')
 
 // Import do arquivo padrão de mensagens
-const MESSAGE_DEFAULT = require('../modulo/config_messages.js')
+const MESSAGE_DEFAULT = require('../../modulo/config_messages.js')
 
 // Retorna todos os atores do BD
 const listarAtores = async function () {
