@@ -227,7 +227,7 @@ const deletarAtor = async function (id) {
             } else
                 return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
         } else
-            return validarID // Retorno da função de buscarGeneroId (400 ou 404 ou 500)
+            return validarID // Retorno da função de buscarAtorId (400 ou 404 ou 500)
     } catch (error) {
         return MESSAGE.ERROR_INTERNAL_SERVER_CONTROLLER // 500
     }
