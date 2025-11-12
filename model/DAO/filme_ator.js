@@ -1,6 +1,6 @@
 /**********************************************************************************************
- * Objetivo: Arquivo responsável pelo CRUD de dados no MYSQL referente ao relacionamento entre filme e genero
- * Data: 05/11/2025
+ * Objetivo: Arquivo responsável pelo CRUD de dados no MYSQL referente ao relacionamento entre filme ator
+ * Data: 12/11/2025
  * Autor: Gustavo Pereira
  * Versão: 1.0
  */
@@ -12,11 +12,11 @@ const { PrismaClient } = require('../../generated/prisma')
 // Cria um objeto do prisma client para manipular os scripts SQL
 const prisma = new PrismaClient()
 
-// Retorna todos os generos de filmes e generos do banco de dados
-const getSelectAllFilmsGenres = async function () {
+// Retorna todos os generos de filmes e atores do banco de dados
+const getSelectAllFilmsActors = async function () {
     try {
         // Script SQL
-        let sql = `select * from tbl_filme_genero order by id desc`
+        let sql = `select * from tbl_filme_ator order by id desc`
 
         // Executa o script SQL no Banco de dados
         let result = await prisma.$queryRawUnsafe(sql)
@@ -31,11 +31,11 @@ const getSelectAllFilmsGenres = async function () {
     }
 }
 
-// Retorna um filmeGenero filtrando pelo ID no BD
-const getSelectByIdFilmGenre = async function (id) {
+// Retorna um filmeAtor filtrando pelo ID no BD
+const getSelectByIdFilmActor = async function (id) {
     try {
         // Script SQL
-        let sql = `select * from tbl_filme_genero where id = ${id}`
+        let sql = `select * from tbl_filme_ator where id = ${id}`
 
         // Executa o script SQL no banco de dados
         let result = await prisma.$queryRawUnsafe(sql)
@@ -50,11 +50,11 @@ const getSelectByIdFilmGenre = async function (id) {
     }
 }
 
-// Retorna os filmesGeneros filtrando pelo id de filme
-const getSelectByIdFilmFilmGenre = async function (idFilme) {
+// Retorna os filmes atores filtrando pelo ID de filme
+const getSelectByIdFilmFilmActor = async function (idFilme) {
     try {
         // Script SQL
-        let sql = `SELECT * FROM tbl_filme_genero WHERE id_filme = ${idFilme}`
+        let sql = `SELECT * FROM tbl_filme_ator WHERE id_filme = ${idFilme}`
 
         // Executa o script SQL no BD
         let result = await prisma.$queryRawUnsafe(sql)
@@ -69,15 +69,15 @@ const getSelectByIdFilmFilmGenre = async function (idFilme) {
     }
 }
 
-// Retorna os generos filtrando pelo ID do filme do BD
-const getSelectGenresByIdFilm = async function (idFilme) {
+// Retorna os atores filtrando pelo ID do filme do BD
+const getSelectActorsByIdFilm = async function (idFilme) {
     try {
         // Script SQL
-        let sql = `select tbl_genero.id, tbl_genero.nome
-        from tbl_filme inner join tbl_filme_genero 
-            on tbl_filme.id = tbl_filme_genero.id_filme
-        inner join tbl_genero
-            on tbl_genero.id = tbl_filme_genero.id_genero 
+        let sql = `select tbl_ator.id_ator, tbl_ator.nome
+        from tbl_filme inner join tbl_filme_ator 
+            on tbl_filme.id = tbl_filme_ator.id_filme
+        inner join tbl_ator
+            on tbl_ator.id_ator = tbl_filme_ator.id_ator
         where tbl_filme.id = ${idFilme}`
 
         // Executa o script SQL no banco de dados
@@ -93,16 +93,16 @@ const getSelectGenresByIdFilm = async function (idFilme) {
     }
 }
 
-// Retorna os filmes filtrando pelo ID do genero do BD
-const getSelectFilmsByIdGenre = async function (idGenero) {
+// Retorna os filmes filtrando pelo ID do ator do BD
+const getSelectFilmsByIdActor = async function (idAtor) {
     try {
         // Script SQL
         let sql = `select tbl_filme.id, tbl_filme.nome
-        from tbl_filme inner join tbl_filme_genero 
-            on tbl_filme.id = tbl_filme_genero.id_filme
-        inner join tbl_genero
-            on tbl_genero.id = tbl_filme_genero.id_genero 
-        where tbl_genero.id = ${idGenero}`
+        from tbl_filme inner join tbl_filme_ator 
+            on tbl_filme.id = tbl_filme_ator.id_filme
+        inner join tbl_ator
+            on tbl_ator.id_ator = tbl_filme_ator.id_ator
+        where tbl_ator.id_ator = ${idAtor}`
 
         // Executa o script SQL no banco de dados
         let result = await prisma.$queryRawUnsafe(sql)
@@ -117,11 +117,11 @@ const getSelectFilmsByIdGenre = async function (idGenero) {
     }
 }
 
-// Retorna o ID do ultimo Filmegenero
-const getSelectLastIdFilmeGenre = async function () {
+// Retorna o ID do ultimo FilmeAtor
+const getSelectLastIdFilmeActor = async function () {
     try {
         // Script SQL
-        let sql = `select id from tbl_filme_genero order by id desc limit 1`
+        let sql = `select id from tbl_filme_ator order by id desc limit 1`
 
         // Executa no banco de dados o script SQL
         let result = await prisma.$queryRawUnsafe(sql)
@@ -137,12 +137,12 @@ const getSelectLastIdFilmeGenre = async function () {
     }
 }
 
-// Insere um Filmegenero no Banco de dados
-const setInsertFilmsGenres = async function (filmeGenero) {
+// Insere um FilmeAtor no Banco de dados
+const setInsertFilmsActors = async function (filmeAtor) {
     try {
-        let sql = `INSERT INTO tbl_filme_genero (id_filme, id_genero) VALUES (${filmeGenero.id_filme}, ${filmeGenero.id_genero})`
+        let sql = `INSERT INTO tbl_filme_ator (id_filme, id_ator) VALUES (${filmeAtor.id_filme}, ${filmeAtor.id_ator})`
 
-        // Executa o script SQL que cria um genero
+        // Executa o script SQL que cria um FilmeAtor
         let result = await prisma.$executeRawUnsafe(sql)
 
         if (result)
@@ -155,10 +155,10 @@ const setInsertFilmsGenres = async function (filmeGenero) {
 
 }
 
-// Atualiza um filmeGenero ja existente no Banco de dados
-const setUpdateFilmsGenres = async function (filmeGenero) {
+// Atualiza um filmeAtor ja existente no Banco de dados
+const setUpdateFilmsActors = async function (filmeAtor) {
     try {
-        let sql = `UPDATE tbl_filme_genero SET id_filme = ${filmeGenero.id_filme}, id_genero = ${filmeGenero.id_genero} WHERE id = ${filmeGenero.id}`
+        let sql = `UPDATE tbl_filme_ator SET id_filme = ${filmeAtor.id_filme}, id_ator = ${filmeAtor.id_ator} WHERE id = ${filmeAtor.id}`
 
         // Executa o comando no banco de dados
         let result = await prisma.$executeRawUnsafe(sql)
@@ -172,12 +172,12 @@ const setUpdateFilmsGenres = async function (filmeGenero) {
     }
 }
 
-// Apaga um Filmegenero existente no BD
-const setDeleteFilmsGenres = async function (id) {
+// Apaga um FilmeAtor existente no BD
+const setDeleteFilmsActors = async function (id) {
     try {
 
         // Script SQL para deletar no BD
-        let sql = `DELETE FROM tbl_filme_genero WHERE id = ${id}`
+        let sql = `DELETE FROM tbl_filme_ator WHERE id = ${id}`
 
         // Executa o script SQL no BD
         let result = await prisma.$executeRawUnsafe(sql)
@@ -192,12 +192,12 @@ const setDeleteFilmsGenres = async function (id) {
     }
 }
 
-// Apaga um filmeGenero existente no BD pelo id de filme
-const setDeleteFilmsGenresByIdFilm = async function (idFilme) {
+// Apaga um filmeAtor existente no BD pelo id de filme
+const setDeleteFilmsActorsByIdFilm = async function (idFilme) {
     try {
 
         // Script SQL para deletar no BD
-        let sql = `DELETE FROM tbl_filme_genero WHERE id_filme = ${idFilme}`
+        let sql = `DELETE FROM tbl_filme_ator WHERE id_filme = ${idFilme}`
 
         // Executa o script SQL no BD
         let result = await prisma.$executeRawUnsafe(sql)
@@ -213,14 +213,14 @@ const setDeleteFilmsGenresByIdFilm = async function (idFilme) {
 }
 
 module.exports = {
-    getSelectAllFilmsGenres,
-    getSelectByIdFilmGenre,
-    getSelectLastIdFilmeGenre,
-    getSelectFilmsByIdGenre,
-    getSelectGenresByIdFilm,
-    setInsertFilmsGenres,
-    setUpdateFilmsGenres,
-    setDeleteFilmsGenres,
-    setDeleteFilmsGenresByIdFilm,
-    getSelectByIdFilmFilmGenre
+    getSelectAllFilmsActors,
+    getSelectByIdFilmActor,
+    getSelectLastIdFilmeActor,
+    getSelectFilmsByIdActor,
+    getSelectActorsByIdFilm,
+    setInsertFilmsActors,
+    setUpdateFilmsActors,
+    setDeleteFilmsActors,
+    setDeleteFilmsActorsByIdFilm,
+    getSelectByIdFilmFilmActor
 }

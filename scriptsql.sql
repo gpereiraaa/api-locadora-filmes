@@ -124,3 +124,18 @@ Create table tbl_filme_genero(
 );
 
 select * from tbl_filme_genero;
+
+
+CREATE TABLE tbl_filme_ator (
+	id int not null primary key auto_increment,
+    id_filme int not null,
+    id_ator int not null,
+    
+    constraint FK_FILME_FILME_ATOR
+    foreign key (id_filme)
+    references tbl_filme(id),
+    
+    constraint FK_ATOR_FILME_ATOR
+    foreign key (id_ator)
+    references tbl_ator(id_ator)
+);

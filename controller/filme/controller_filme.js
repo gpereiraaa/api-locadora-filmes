@@ -11,6 +11,9 @@ const filmeDAO = require('../../model/DAO/filme.js')
 // Import da controller filmeGenero (tabela de relação)
 const controllerFilmeGenero = require('./controller_filme_genero.js')
 
+// Import da controller filmeAtor (tabela de relação)
+const controllerFilmeAtor = require('./controller_filme_ator.js')
+
 // Import do arquivo que padroniza todas as mensagens
 const MESSAGE_DEFAULT = require('../modulo/config_messages.js')
 
@@ -27,15 +30,22 @@ const listarFilmes = async function () {
         if (result) {
             if (result.length > 0) {
 
-                // Processamento para adicionar os generos em cada filme
+                // Processamento para adicionar os generos e atores em cada filme
 
                 for (filme of result) {
 
                     let resultGenerosFilme = await controllerFilmeGenero.listarGenerosIdFilme(filme.id)
+                    let resultAtoresFilme = await controllerFilmeAtor.listarAtoresIdFilme(filme.id)
+
                     if (resultGenerosFilme.status_code == 200)
                         filme.genero = resultGenerosFilme.response.filme_genero
                     else
                         filme.genero = []
+
+                    if (resultAtoresFilme.status_code == 200)
+                        filme.ator = resultAtoresFilme.response.filme_ator
+                    else
+                        filme.ator = []
                 }
 
                 MESSAGE.HEADER.status = MESSAGE.SUCCESS_REQUEST.status
@@ -66,19 +76,28 @@ const buscarFilmeId = async function (id) {
 
             if (result) {
                 if (result.length > 0) {
-                    // Processamento para adicionar os generos no filme
+                    // Processamento para adicionar os generos e atores no filme
+                    for (filme of result) {
 
-                    let resultGenerosFilme = await controllerFilmeGenero.listarGenerosIdFilme(id)
-                    if (resultGenerosFilme.status_code == 200)
-                        result.genero = resultGenerosFilme.response.filme_genero
-                    else
-                        result.genero = []
+                        let resultGenerosFilme = await controllerFilmeGenero.listarGenerosIdFilme(id)
+                        let resultAtoresFilme = await controllerFilmeAtor.listarAtoresIdFilme(id)
+                        if (resultGenerosFilme.status_code == 200)
+                            filme.genero = resultGenerosFilme.response.filme_genero
+                        else
+                            filme.genero = []
+
+                        if (resultAtoresFilme.status_code == 200)
+                            filme.ator = resultAtoresFilme.response.filme_ator
+                        else
+                            filme.ator = []
+                    }
 
                     MESSAGE.HEADER.status = MESSAGE.SUCCESS_REQUEST.status
                     MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_REQUEST.status_code
                     MESSAGE.HEADER.response.film = result
 
                     return MESSAGE.HEADER // 200
+
                 } else
                     return MESSAGE.ERROR_NOT_FOUND // 404
             } else
@@ -131,6 +150,17 @@ const inserirFilme = async function (filme, contentType) {
                             if (resultFilmeGenero.status_code != 201)
                                 return MESSAGE.ERROR_RELATION_TABLE // 200, porém com problemas na tabela de relação
                         }
+                        for (ator of filme.ator) {
+                            let filmeAtor = {
+                                id_filme: lastIdFilme,
+                                id_ator: ator.id
+                            }
+
+                            let resultFilmeAtor = await controllerFilmeAtor.inserirFilmeAtor(filmeAtor, contentType)
+
+                            if (resultFilmeAtor.status_code != 201)
+                                return MESSAGE.ERROR_RELATION_TABLE // 200, porém com problemas na tabela de relação
+                        }
 
                         // Adiciona no JSON de filme o ID que foi gerado pelo BD
                         filme.id = lastIdFilme
@@ -149,6 +179,17 @@ const inserirFilme = async function (filme, contentType) {
 
                         // Adiciona novamente o atributo genero com todas as informações do genero (ID, nome)
                         filme.genero = resultGenerosFilme.response.filme_genero
+
+                        // Processamento para trazer dados dos atores cadastrados na tabela de relação
+
+                        // Apaga o atributo ator que chegou no POST apenas com IDs
+                        delete filme.ator
+
+                        //Pesquisa no BD quais os generos e os seus dados que foram inseridos na tabela de relação
+                        let resultAtorFilme = await controllerFilmeAtor.listarAtoresIdFilme(lastIdFilme)
+
+                        // Adiciona novamente o atributo ator com as informações do ator (ID, nome)
+                        filme.ator = resultAtorFilme.response.filme_ator
 
                         MESSAGE.HEADER.response = filme
 
@@ -197,12 +238,76 @@ const atualizarFilme = async function (filme, id, contentType) {
                     let result = await filmeDAO.setUpdateFilms(filme)
 
                     if (result) {
-                        MESSAGE.HEADER.status = MESSAGE.SUCCESS_UPDATE_ITEM.status
-                        MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_UPDATE_ITEM.status_code
-                        MESSAGE.HEADER.message = MESSAGE.SUCCESS_UPDATE_ITEM.message
-                        MESSAGE.HEADER.response = filme
 
-                        return MESSAGE.HEADER // 200
+                        // Chama função para excluir os generos ja existentes
+                        let resultDeleteFilmesGeneros = await controllerFilmeGenero.excluirFilmeGeneroIdFilme(id)
+                        if (resultDeleteFilmesGeneros.status_code == 200 || resultDeleteFilmesGeneros.status_code == 404) {
+
+                            // Processamento para inseir dados na tabela de relação
+                            // Repetição para pegar cada genero e envia para o DAO filmeGenero
+                            for (genero of filme.genero) {
+                                let filmeGenero = {
+                                    id_filme: id,
+                                    id_genero: genero.id
+                                }
+
+                                let resultFilmeGenero = await controllerFilmeGenero.inserirFilmeGenero(filmeGenero, contentType)
+
+                                if (resultFilmeGenero.status_code != 201)
+                                    return MESSAGE.ERROR_RELATION_TABLE // 200, porém com problemas na tabela de relação    
+                            }
+
+                            MESSAGE.HEADER.status = MESSAGE.SUCCESS_UPDATE_ITEM.status
+                            MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_UPDATE_ITEM.status_code
+                            MESSAGE.HEADER.message = MESSAGE.SUCCESS_UPDATE_ITEM.message
+
+                            // Processamento para trazer os dados cadastrados na tabela de relação
+
+                            // Apaga o atributo genero que chegou via PUT apenas com os IDs
+                            delete filme.genero
+
+                            // Pesquisa no BD quais os generos foram cadastrados para o filme
+                            let resultGenerosFilme = await controllerFilmeGenero.listarGenerosIdFilme(id)
+
+                            // Adiciona novamente o atributo de genero com as informações necessarias
+                            filme.genero = resultGenerosFilme.response.filme_genero
+
+                            // Chama a função para excluir os atores existentes
+                            let resultDeleteFilmesAtores = await controllerFilmeAtor.excluirFilmeAtorIdFilme(id)
+                            if (resultDeleteFilmesAtores.status_code == 200 || resultDeleteFilmesAtores.status_code == 404) {
+
+                                // Processamento para inseir dados na tabela de relação
+                                // Repetição para pegar cada ator e envia para o DAO filmeAtor
+                                for (ator of filme.ator) {
+                                    let filmeAtor = {
+                                        id_filme: id,
+                                        id_ator: ator.id
+                                    }
+
+                                    let resultFilmeAtor = await controllerFilmeAtor.inserirFilmeAtor(filmeAtor, contentType)
+
+                                    if (resultFilmeAtor.status_code != 201)
+                                        return MESSAGE.ERROR_RELATION_TABLE // 200, porém com problemas na tabela de relação    
+                                }
+
+                                // Processamento para trazer os dados cadastrados na tabela de relação
+
+                                // Apaga o atributo ator que chegou via PUT apenas com os IDs
+                                delete filme.ator
+
+                                // Pesquisa no BD quais os atores foram cadastrados para o filme
+                                let resultAtoresFilme = await controllerFilmeAtor.listarAtoresIdFilme(id)
+
+                                // Adiciona novamente o atributo de ator com as informações necessarias
+                                filme.ator = resultAtoresFilme.response.filme_ator
+
+                                MESSAGE.HEADER.response = filme
+
+                                return MESSAGE.HEADER // 200
+                            } else
+                                return resultDeleteFilmesAtores // 400, 500
+                        } else
+                            return resultDeleteFilmesGeneros // 400, 500
                     } else
                         return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
                 } else
@@ -222,7 +327,7 @@ const atualizarFilme = async function (filme, id, contentType) {
 // Apaga um filme filtrando pelo ID
 const excluirFilme = async function (id) {
 
-
+    // Realizando uma copia do objeto MESSAGE_DEFAULT, permitindo que as alterações desta função não interfiram em outras funções 
     let MESSAGE = JSON.parse(JSON.stringify(MESSAGE_DEFAULT))
 
     try {
@@ -234,17 +339,27 @@ const excluirFilme = async function (id) {
 
         // Verifica se o ID existe no BD, caso exista teremos o status 200
         if (validarID.status_code == 200) {
-            // Chama a função do DAO para deletar um filme
-            let result = await filmeDAO.setDeleteFilms(idFilme)
 
-            if (result) {
-                MESSAGE.HEADER.status = MESSAGE.SUCCESS_DELETE_ITEM.status
-                MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_DELETE_ITEM.status_code
-                MESSAGE.HEADER.message = MESSAGE.SUCCESS_DELETE_ITEM.message
+            // Chama a função que deleta na tabela de filmeGenero pelo ID de filme
+            let resultDeleteFilmesGeneros = await controllerFilmeGenero.excluirFilmeGeneroIdFilme(idFilme)
+            if (resultDeleteFilmesGeneros.status_code == 200 || resultDeleteFilmesGeneros.status_code == 404) {
+                let resultDeleteFilmeAtor = await controllerFilmeAtor.excluirFilmeAtorIdFilme(idFilme)
+                if (resultDeleteFilmeAtor.status_code == 200 || resultDeleteFilmeAtor.status_code == 404) {
+                    // Chama a função do DAO para deletar um filme
+                    let result = await filmeDAO.setDeleteFilms(idFilme)
 
-                return MESSAGE.HEADER // 200 
+                    if (result) {
+                        MESSAGE.HEADER.status = MESSAGE.SUCCESS_DELETE_ITEM.status
+                        MESSAGE.HEADER.status_code = MESSAGE.SUCCESS_DELETE_ITEM.status_code
+                        MESSAGE.HEADER.message = MESSAGE.SUCCESS_DELETE_ITEM.message
+
+                        return MESSAGE.HEADER // 200 
+                    } else
+                        return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
+                } else
+                    return resultDeleteFilmeAtor // 500, 400
             } else
-                return MESSAGE.ERROR_INTERNAL_SERVER_MODEL // 500
+                return resultDeleteFilmesGeneros // 500, 400
         } else
             return validarID // Retorno da função de buscarFilmeID (400 ou 404 ou 500)
     } catch (error) {
