@@ -139,3 +139,23 @@ CREATE TABLE tbl_filme_ator (
     foreign key (id_ator)
     references tbl_ator(id_ator)
 );
+
+
+CREATE TABLE tbl_filme_ator_personagem (
+	id int not null primary key auto_increment,
+    id_filme int not null,
+    id_ator int not null,
+    id_personagem int not null,
+    
+    constraint FK_FILME_FILME_ATOR_PERSONAGEM
+    foreign key (id_filme)
+    references tbl_filme(id),
+    
+    constraint FK_ATOR_FILME_ATOR_PERSONAGEM
+    foreign key (id_ator)
+    references tbl_ator(id_ator),
+    
+    constraint FK_PERSONAGEM_FILME_ATOR_PERSONAGEM
+    foreign key (id_personagem)
+    references tbl_personagem(id_personagem)
+);
