@@ -1,168 +1,1271 @@
 openapi: 3.0.3
 info:
-  title: Projeto API locadora de filmes - Gustavo Pereira
-  description: |-
-   API destinada a controle de filmes de locadora
-  termsOfService: http://swagger.io/terms/
+  title: API Locadora de Filmes
+  version: 1.0.10.25
+  description: |
+    API responsável pelo CRUD de filmes, atores, diretores, produtores, personagens e gêneros de uma locadora.
+    
+    **Desenvolvedor:** Gustavo Pereira
+    **Base URL:** /v1/locadora
   contact:
     email: guga20.leite@gmail.com
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.0
-externalDocs:
-  description: Find out more about Swagger
-  url: http://swagger.io
 servers:
   - url: http://localhost:8080
+    description: Servidor Local
+
+tags:
+  - name: Filme
+    description: Gestão do catálogo de filmes (incluindo relações com atores e gêneros)
+  - name: Gênero
+    description: Categorias dos filmes
+  - name: Ator
+    description: Gestão de atores e atrizes
+  - name: Diretor
+    description: Gestão de diretores de cinema
+  - name: Produtora
+    description: Empresas produtoras de filmes
+  - name: Personagem
+    description: Personagens interpretados nos filmes
+
 paths:
+  # ==========================================
+  # DOMÍNIO: FILME
+  # Base: /v1/locadora/filme
+  # ==========================================
   /v1/locadora/filme:
-    post:
-      tags:
-        - Filme
-      summary: Insere um novo filme
-      description: Adiciona um novo filme
-      requestBody:
-        description: JSON contendo os dados do novo filme a ser inserido no sistema
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Filme'
-        required: true
-      responses:
-        '201':
-          description: Successful operation
-        '400':
-          description: Invalid input
-        '500':
-          description: Error internal server
-        '415':
-          description: Error content-type
     get:
       tags:
         - Filme
       summary: Lista todos os filmes
-      description: Listagem de todos os filmes registrados no sistema
+      description: Retorna a lista de filmes com seus respectivos gêneros e elenco.
       responses:
         '200':
-          description: successful operation
-        '404':
-          description: NOT FOUND
-        '500':
-          description: Error internal server
+          description: Sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Filme'
-  /v1/locadora/filme/{id}:
-    get:
-      tags:
-        - Filme
-      summary: Busca um filme pelo ID
-      description: Retorna um filme pelo ID
-      parameters:
-        - name: id
-          in: path
-          description: ID do filme
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Filme'          
-        '400':
-          description: Invalid input
+                $ref: '#/components/schemas/ResponseFilmeList'
         '404':
-          description: Not Found
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: Error internal server
-    put:
+          $ref: '#/components/responses/InternalServerError'
+    post:
       tags:
         - Filme
-      summary: Atualiza um filme existente
-      description: Atualiza um filme existente pelo Id
-      parameters:
-        - name: id
-          in: path
-          description: ID do filme
-          required: true
-          schema:
-            type: integer
-            format: int64
+      summary: Cadastra novo filme
+      description: Insere um filme e suas relações (gêneros e atores/personagens). Requer JSON.
       requestBody:
-        description: Atualiza um filme existente no Banco de dados
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Filme'
-        required: true
+              $ref: '#/components/schemas/FilmeInput'
+      responses:
+        '201':
+          description: Criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseFilmeSingle'
+        '200':
+          description: Criado com ressalvas (Erro na tabela de relação)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /v1/locadora/filme/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags:
+        - Filme
+      summary: Busca filme por ID
       responses:
         '200':
-          description: successful operation
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseFilmeSingle'
         '400':
-          description: Invalid input
+          $ref: '#/components/responses/BadRequest'
         '404':
-          description: NOT FOUND
-        '415':
-          description: Error content-type
+          $ref: '#/components/responses/NotFound'
         '500':
-          description: Error internal server
-       
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Filme
+      summary: Atualiza filme
+      description: Atualiza dados do filme e recria as relações de gênero e elenco.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilmeInput'
+      responses:
+        '200':
+          description: Atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseFilmeSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
     delete:
       tags:
-        - aluno
-      summary: Delete aluno
-      description: Excluir um aluno
-      parameters:
-        - name: id
-          in: path
-          description: ID of pet to return
-          required: true
-          schema:
-            type: integer
-            format: int64
+        - Filme
+      summary: Deleta filme
       responses:
         '200':
-          description: successful operation
+          $ref: '#/components/responses/SuccessGeneric'
         '400':
-          description: Invalid ID supplied
+          $ref: '#/components/responses/BadRequest'
         '404':
-          description: Pet not found
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  # ==========================================
+  # DOMÍNIO: GÊNERO
+  # Base: /v1/locadora/genero
+  # ==========================================
+  /v1/locadora/genero:
+    get:
+      tags:
+        - Gênero
+      summary: Lista todos os gêneros
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseGeneroList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Gênero
+      summary: Cadastra novo gênero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneroInput'
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseGeneroSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /v1/locadora/genero/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags:
+        - Gênero
+      summary: Busca gênero por ID
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseGeneroSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Gênero
+      summary: Atualiza gênero
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneroInput'
+      responses:
+        '200':
+          description: Atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseGeneroSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Gênero
+      summary: Deleta gênero
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessGeneric'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # DOMÍNIO: ATOR
+  # Base: /v1/locadora/ator
+  # ==========================================
+  /v1/locadora/ator:
+    get:
+      tags:
+        - Ator
+      summary: Lista todos os atores
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAtorList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Ator
+      summary: Cadastra novo ator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtorInput'
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAtorSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /v1/locadora/ator/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags:
+        - Ator
+      summary: Busca ator por ID
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAtorSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Ator
+      summary: Atualiza ator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtorInput'
+      responses:
+        '200':
+          description: Atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAtorSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Ator
+      summary: Deleta ator
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessGeneric'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # DOMÍNIO: DIRETOR
+  # Base: /v1/locadora/diretor
+  # ==========================================
+  /v1/locadora/diretor:
+    get:
+      tags:
+        - Diretor
+      summary: Lista todos os diretores
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseDiretorList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Diretor
+      summary: Cadastra novo diretor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiretorInput'
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseDiretorSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /v1/locadora/diretor/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags:
+        - Diretor
+      summary: Busca diretor por ID
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseDiretorSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Diretor
+      summary: Atualiza diretor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiretorInput'
+      responses:
+        '200':
+          description: Atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseDiretorSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Diretor
+      summary: Deleta diretor
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessGeneric'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # DOMÍNIO: PRODUTORA
+  # Base: /v1/locadora/produtora
+  # ==========================================
+  /v1/locadora/produtora:
+    get:
+      tags:
+        - Produtora
+      summary: Lista todas as produtoras
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseProdutoraList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Produtora
+      summary: Cadastra nova produtora
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoraInput'
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseProdutoraSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /v1/locadora/produtora/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags:
+        - Produtora
+      summary: Busca produtora por ID
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseProdutoraSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Produtora
+      summary: Atualiza produtora
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProdutoraInput'
+      responses:
+        '200':
+          description: Atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseProdutoraSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Produtora
+      summary: Deleta produtora
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessGeneric'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ==========================================
+  # DOMÍNIO: PERSONAGEM
+  # Base: /v1/locadora/personagem
+  # ==========================================
+  /v1/locadora/personagem:
+    get:
+      tags:
+        - Personagem
+      summary: Lista todos os personagens
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsePersonagemList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+        - Personagem
+      summary: Cadastra novo personagem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonagemInput'
+      responses:
+        '201':
+          description: Criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsePersonagemSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+
+  /v1/locadora/personagem/{id}:
+    parameters:
+      - $ref: '#/components/parameters/IdPath'
+    get:
+      tags:
+        - Personagem
+      summary: Busca personagem por ID
+      responses:
+        '200':
+          description: Sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsePersonagemSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Personagem
+      summary: Atualiza personagem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PersonagemInput'
+      responses:
+        '200':
+          description: Atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponsePersonagemSingle'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Personagem
+      summary: Deleta personagem
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessGeneric'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+
+# ==========================================
+# COMPONENTES
+# ==========================================
 components:
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      description: ID numérico único do registro
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 5
+
   schemas:
-    Filme:
-      required:
-        - nome
+    # --- ENVELOPE PADRÃO ---
+    GenericResponse:
       type: object
+      description: Estrutura padrão de resposta da API
+      properties:
+        development:
+          type: string
+          description: Nome do desenvolvedor
+          example: "Gustavo Pereira"
+        api_description:
+          type: string
+          description: Descrição da API
+          example: "API para manipular dados da locadora de filmes"
+        version:
+          type: string
+          description: Versão atual
+          example: "1.0.10.25"
+        request_date:
+          type: string
+          description: Data da requisição
+          example: "07/10/2025"
+        status:
+          type: boolean
+          description: Status da operação
+          example: true
+        status_code:
+          type: integer
+          description: Código HTTP
+          example: 200
+        message:
+          type: string
+          description: Mensagem descritiva
+          example: "Requisição bem sucedida!!!"
+
+    # --- FILME ---
+    FilmeData:
+      type: object
+      description: Dados detalhados do filme
       properties:
         id:
           type: integer
+          description: ID do filme
+          example: 10
         nome:
           type: string
+          description: Título do filme
+          example: "Velozes e Furiosos"
         sinopse:
           type: string
+          description: Sinopse do filme
+          example: "Brian O'Conner é um policial..."
         data_lancamento:
           type: string
+          description: Data de lançamento (YYYY-MM-DD)
+          example: "2001-06-22"
         duracao:
           type: string
+          description: Duração do filme
+          example: "01:46:00"
         orcamento:
           type: number
+          description: Valor do orçamento
+          example: 38000000
         trailer:
           type: string
+          description: URL do trailer
+          example: "https://youtube.com/..."
         capa:
           type: string
-  requestBodies:
-    Filme:
-      description: Objeto que deve ser enviado no Body das requisicoes
+          description: URL da capa do filme
+          example: "https://imagem.com/capa.jpg"
+        genero:
+          type: array
+          description: Lista de gêneros associados
+          items:
+            $ref: '#/components/schemas/GeneroData'
+        ator:
+          type: array
+          description: Lista de elenco associado
+          items:
+            type: object
+            description: Relação Filme-Ator-Personagem
+            properties:
+              id:
+                type: integer
+                description: ID da relação
+              id_filme:
+                type: integer
+                description: ID do filme
+              id_ator:
+                type: integer
+                description: ID do ator
+              id_personagem:
+                type: integer
+                description: ID do personagem
+    
+    FilmeInput:
+      type: object
+      description: Dados para criação/atualização de filme
+      required: [nome, sinopse, data_lancamento, duracao, orcamento, trailer, capa]
+      properties:
+        nome:
+          type: string
+          description: Título do filme
+          example: "Velozes e Furiosos"
+        sinopse:
+          type: string
+          description: Sinopse
+          example: "Brian O'Conner é um policial..."
+        data_lancamento:
+          type: string
+          description: Data de lançamento (YYYY-MM-DD)
+          example: "2001-06-22"
+        duracao:
+          type: string
+          description: Duração (HH:mm:ss)
+          example: "01:46:00"
+        orcamento:
+          type: number
+          description: Valor do orçamento
+          example: 38000000
+        trailer:
+          type: string
+          description: URL do trailer
+          example: "https://youtube.com/..."
+        capa:
+          type: string
+          description: URL da imagem de capa
+          example: "https://imagem.com/capa.jpg"
+        genero:
+          type: array
+          description: Lista de IDs dos gêneros
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: ID do gênero
+                example: 1
+        ator_personagem:
+          type: array
+          description: Lista de relações ator-personagem
+          items:
+            type: object
+            properties:
+              idAtor:
+                type: integer
+                description: ID do ator
+                example: 5
+              idPersonagem:
+                type: integer
+                description: ID do personagem
+                example: 2
+
+    ResponseFilmeList:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                films:
+                  type: array
+                  description: Lista de filmes
+                  items:
+                    $ref: '#/components/schemas/FilmeData'
+
+    ResponseFilmeSingle:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                film:
+                  $ref: '#/components/schemas/FilmeData'
+
+    # --- GÊNERO ---
+    GeneroData:
+      type: object
+      description: Dados do gênero
+      properties:
+        id:
+          type: integer
+          description: ID do gênero
+          example: 1
+        nome:
+          type: string
+          description: Nome do gênero
+          example: "Ação"
+        descricao:
+          type: string
+          description: Descrição do gênero
+          example: "Filmes com muitas explosões"
+
+    GeneroInput:
+      type: object
+      description: Input para gênero
+      required: [nome, descricao]
+      properties:
+        nome:
+          type: string
+          description: Nome do gênero
+          example: "Ação"
+        descricao:
+          type: string
+          description: Descrição do gênero
+          example: "Filmes de ação"
+
+    ResponseGeneroList:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                generos:
+                  type: array
+                  description: Lista de gêneros
+                  items:
+                    $ref: '#/components/schemas/GeneroData'
+
+    ResponseGeneroSingle:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                genero:
+                  $ref: '#/components/schemas/GeneroData'
+
+    # --- ATOR ---
+    AtorData:
+      type: object
+      description: Dados do ator
+      properties:
+        id:
+          type: integer
+          description: ID do ator
+        nome:
+          type: string
+          description: Nome do ator
+        nacionalidade:
+          type: string
+          description: Nacionalidade
+        sexo:
+          type: string
+          description: Gênero
+        data_nascimento:
+          type: string
+          description: Data de nascimento
+        foto:
+          type: string
+          description: URL da foto
+        altura:
+          type: number
+          description: Altura em metros
+        biografia:
+          type: string
+          description: Biografia resumida
+
+    AtorInput:
+      type: object
+      description: Input para ator
+      required: [nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia]
+      properties:
+        nome:
+          type: string
+          description: Nome completo
+          example: "Paul Walker"
+        nacionalidade:
+          type: string
+          description: País de origem
+          example: "Americano"
+        sexo:
+          type: string
+          description: Gênero
+          example: "Masculino"
+        data_nascimento:
+          type: string
+          description: Data de nascimento (YYYY-MM-DD)
+          example: "1973-09-12"
+        foto:
+          type: string
+          description: URL da foto
+          example: "https://imagem.com/paul.jpg"
+        altura:
+          type: number
+          description: Altura em metros
+          example: 1.88
+        biografia:
+          type: string
+          description: Texto biográfico
+          example: "Foi um ator norte-americano..."
+
+    ResponseAtorList:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                atores:
+                  type: array
+                  description: Lista de atores
+                  items:
+                    $ref: '#/components/schemas/AtorData'
+
+    ResponseAtorSingle:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                ator:
+                  $ref: '#/components/schemas/AtorData'
+
+    # --- DIRETOR ---
+    DiretorData:
+      type: object
+      description: Dados do diretor (estrutura idêntica a Ator)
+      properties:
+        id_diretor:
+          type: integer
+          description: ID do diretor
+        nome:
+          type: string
+          description: Nome
+        nacionalidade:
+          type: string
+          description: Nacionalidade
+        sexo:
+          type: string
+          description: Sexo
+        data_nascimento:
+          type: string
+          description: Data nascimento
+        foto:
+          type: string
+          description: URL foto
+        altura:
+          type: number
+          description: Altura
+        biografia:
+          type: string
+          description: Biografia
+
+    DiretorInput:
+      type: object
+      description: Input para diretor
+      required: [nome, nacionalidade, sexo, data_nascimento, foto, altura, biografia]
+      properties:
+        nome:
+          type: string
+          description: Nome
+          example: "Christopher Nolan"
+        nacionalidade:
+          type: string
+          description: Nacionalidade
+          example: "Britânico"
+        sexo:
+          type: string
+          description: Sexo
+          example: "Masculino"
+        data_nascimento:
+          type: string
+          description: Data nascimento (YYYY-MM-DD)
+          example: "1970-07-30"
+        foto:
+          type: string
+          description: URL Foto
+          example: "https://img.com/nolan.jpg"
+        altura:
+          type: number
+          description: Altura
+          example: 1.81
+        biografia:
+          type: string
+          description: Biografia
+          example: "Diretor conhecido por..."
+
+    ResponseDiretorList:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                diretores:
+                  type: array
+                  description: Lista de diretores
+                  items:
+                    $ref: '#/components/schemas/DiretorData'
+
+    ResponseDiretorSingle:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                diretor:
+                  $ref: '#/components/schemas/DiretorData'
+
+    # --- PRODUTORA ---
+    ProdutoraData:
+      type: object
+      description: Dados da produtora
+      properties:
+        id_produtora:
+          type: integer
+          description: ID
+        nome:
+          type: string
+          description: Nome
+        pais:
+          type: string
+          description: País
+        data_fundacao:
+          type: string
+          description: Data fundação
+        descricao:
+          type: string
+          description: Descrição
+        site:
+          type: string
+          description: Website
+
+    ProdutoraInput:
+      type: object
+      description: Input para produtora
+      required: [nome, pais, data_fundacao, descricao, site]
+      properties:
+        nome:
+          type: string
+          description: Nome da produtora
+          example: "Warner Bros"
+        pais:
+          type: string
+          description: País sede
+          example: "EUA"
+        data_fundacao:
+          type: string
+          description: Data de fundação (YYYY-MM-DD)
+          example: "1923-04-04"
+        descricao:
+          type: string
+          description: Descrição da empresa
+          example: "Estúdio de cinema..."
+        site:
+          type: string
+          description: Site oficial
+          example: "https://warnerbros.com"
+
+    ResponseProdutoraList:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                produtoras:
+                  type: array
+                  description: Lista de produtoras
+                  items:
+                    $ref: '#/components/schemas/ProdutoraData'
+
+    ResponseProdutoraSingle:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                produtora:
+                  $ref: '#/components/schemas/ProdutoraData'
+
+    # --- PERSONAGEM ---
+    PersonagemData:
+      type: object
+      description: Dados do personagem
+      properties:
+        id_personagem:
+          type: integer
+          description: ID
+        nome:
+          type: string
+          description: Nome
+        apelido:
+          type: string
+          description: Apelido
+        nacionalidade:
+          type: string
+          description: Nacionalidade
+        sexo:
+          type: string
+          description: Sexo
+        foto:
+          type: string
+          description: URL Foto
+        biografia:
+          type: string
+          description: Biografia
+        descricao:
+          type: string
+          description: Descrição breve
+
+    PersonagemInput:
+      type: object
+      description: Input para personagem
+      required: [nome, apelido, nacionalidade, sexo, foto, biografia, descricao]
+      properties:
+        nome:
+          type: string
+          description: Nome do personagem
+          example: "Brian O'Conner"
+        apelido:
+          type: string
+          description: Apelido
+          example: "Brian"
+        nacionalidade:
+          type: string
+          description: Nacionalidade
+          example: "Americano"
+        sexo:
+          type: string
+          description: Sexo
+          example: "Masculino"
+        foto:
+          type: string
+          description: URL da foto
+          example: "https://img.com/brian.jpg"
+        biografia:
+          type: string
+          description: História do personagem
+          example: "Ex-policial..."
+        descricao:
+          type: string
+          description: Descrição curta
+          example: "Piloto habilidoso"
+
+    ResponsePersonagemList:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                personagens:
+                  type: array
+                  description: Lista de personagens
+                  items:
+                    $ref: '#/components/schemas/PersonagemData'
+
+    ResponsePersonagemSingle:
+      allOf:
+        - $ref: '#/components/schemas/GenericResponse'
+        - type: object
+          properties:
+            response:
+              type: object
+              description: Payload de resposta
+              properties:
+                personagem:
+                  $ref: '#/components/schemas/PersonagemData'
+
+  responses:
+    SuccessGeneric:
+      description: Operação realizada com sucesso
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Aluno'
-    
+            $ref: '#/components/schemas/GenericResponse'
+    BadRequest:
+      description: 'Requisição Inválida (Campos obrigatórios ou tipo de dados)'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/GenericResponse'
+              - type: object
+                properties:
+                  status_code:
+                    example: 400
+                    description: Código de erro HTTP
+                  message:
+                    example: "Não foi possível processar a requisição devido a campos inválidos"
+                    description: Detalhe do erro
+    NotFound:
+      description: Registro não encontrado
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/GenericResponse'
+              - type: object
+                properties:
+                  status_code:
+                    example: 404
+                    description: Código de erro HTTP
+                  message:
+                    example: "Não foram encontrados dados de retorno!!!"
+                    description: Detalhe do erro
+    UnsupportedMediaType:
+      description: 'Tipo de conteúdo inválido (JSON obrigatório)'
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/GenericResponse'
+              - type: object
+                properties:
+                  status_code:
+                    example: 415
+                    description: Código de erro HTTP
+                  message:
+                    example: "Content-Type inválido, deve ser application/json"
+                    description: Detalhe do erro
+    InternalServerError:
+      description: Erro interno no servidor ou banco de dados
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/GenericResponse'
+              - type: object
+                properties:
+                  status_code:
+                    example: 500
+                    description: Código de erro HTTP
+                  message:
+                    example: "Erro interno no servidor controller/model"
+                    description: Detalhe do erro
